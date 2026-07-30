@@ -21,5 +21,5 @@ Este repositório reúne meus projetos práticos, códigos de estudo e scripts d
 - Desenvolvimento de endpoints RESTful nativos em Protheus para integração de dados de faturamento.
 
 ---
-✉️ **Contato:** edsoncdiasfilho@ | [LinkedIn](URL-DO-SEU-LINKEDIN)
+✉️ **Contato:** edsoncdiasfilho@gmail.com | [LinkedIn](www.linkedin.com/in/edson-coelho-65213829)
 
