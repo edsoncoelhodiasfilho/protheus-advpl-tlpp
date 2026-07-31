@@ -1,0 +1,82 @@
+#INCLUDE 'TOTVS.CH'
+#INCLUDE 'FWMVCDEF.CH'
+
+/*/{Protheus.doc} User Function VAREJO01
+    Rotina customizada em padrão MVC com Embedded SQL (Oracle) para consulta de dados de vendas.
+    Demonstração de portfólio unindo regras de Varejo à arquitetura Protheus.
+    @type  Function
+    @author Edson Coelho Dias Filho
+    @since  2026
+/*/
+User Function VAREJO01()
+    Local oBrowse := Nil
+
+    // Instancia o componente de visualização de dados (Grid)
+    oBrowse := FWMBrowse():New()
+    oBrowse:SetAlias('SZ1') // Tabela customizada fictícia de resumo de vendas
+    oBrowse:SetDescription('Painel de Monitoramento de Vendas - Varejo')
+    oBrowse:Activate()
+Return Nil
+
+/*/{Protheus.doc} ModelDef
+    Definição do Modelo de Dados (Model) no padrão MVC
+/*/
+Static Function ModelDef()
+    Local oModel := Nil
+    Local oStruct := FWFormStruct(1, 'SZ1')
+
+    oModel := MPFormModel():New('VAREJO01M')
+    oModel:AddFields('SZ1MASTER', Nil, oStruct)
+    oModel:SetDescription('Modelo de Dados de Vendas Varejo')
+Return oModel
+
+/*/{Protheus.doc} ViewDef
+    Definição da Interface Visual (View) no padrão MVC
+/*/
+Static Function ViewDef()
+    Local oView   := Nil
+    Local oModel  := FWLoadModel('vendas_varejo_mvc')
+    Local oStruct := FWFormStruct(2, 'SZ1')
+
+    oView := FWFormView():New()
+    oView:SetModel(oModel)
+    oView:AddField('VIEW_SZ1', oStruct, 'SZ1MASTER')
+    oView:CreateHorizontalBox('TELA_TOTAL', 100)
+    oView:SetOwnerView('VIEW_SZ1', 'TELA_TOTAL')
+Return oView
+
+/*/{Protheus.doc} QryVendasOracle
+    Método focado em extrair dados do Oracle via Embedded SQL de forma otimizada.
+    Demonstra a senioridade em performance de banco de dados aplicada ao Protheus.
+/*/
+User Function QryVendasOracle(cFilial)
+    Local cAliasTmp := GetNextAlias()
+    Default cFilial := xFilial("SZ1")
+
+    // O Protheus converte o bloco BeginSQL/EndSQL diretamente em uma Query nativa para o DBAccess/Oracle
+    BeginSQL Alias cAliasTmp
+        SELECT 
+            Z1_FILIAL,
+            Z1_PRODUTO,
+            Z1_QUANT,
+            Z1_VALOR
+        FROM 
+            %Table:SZ1% SZ1
+        WHERE 
+            SZ1.Z1_FILIAL = %xFilial:SZ1% AND
+            SZ1.D_E_L_E_T_ = ' '
+        ORDER BY 
+            Z1_PRODUTO
+    EndSQL
+
+    // Navegação otimizada no cursor do banco de dados (Conceito N3/Suporte de performance)
+    While !(cAliasTmp)->(Eof())
+        // Processamento sênior de dados em memória
+        // (Espaço para aplicar regras de faturamento ou quebra de estoque)
+        
+        (cAliasTmp)->(DbSkip())
+    EndDo
+
+    // Fecha a área temporária liberando os cursores no Oracle
+    (cAliasTmp)->(DbCloseArea())
+Return Nil
