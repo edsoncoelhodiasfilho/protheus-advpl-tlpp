@@ -1,0 +1,48 @@
+#INCLUDE 'TOTVS.CH'
+
+/*/{Protheus.doc} User Function MTA410BRW
+    Ponto de Entrada disparado na montagem da tela (Browse) do Pedido de Venda (MATA410).
+    Utilizado aqui para validar regras corporativas de desconto aplicadas ao Varejo.
+    
+    @type  Function
+    @author Edson Coelho Dias Filho
+    @since  2026
+    @version Protheus 12 / TL++
+/*/
+User Function MTA410BRW()
+    Local aBotoes     := {}
+    Local nMaxDesconto := 15.00 // Percentual máximo de desconto permitido sem alçada sênior
+
+    // Adiciona um botão customizado na barra de ferramentas do Pedido de Venda
+    // para que o Analista de Operações ou Gerente audite o pedido selecionado
+    AAdd(aBotoes, { "Auditar Desconto Varejo", "U_VldDescVrf()", 0, 4, 0, Nil })
+
+    // O Ponto de Entrada padrão MTA410BRW espera o retorno de um array de botões customizados
+    Return aBotoes
+
+
+/*/{Protheus.doc} VldDescVrf
+    Função de validação que analisa o percentual de desconto gravado no pedido atual (SC5).
+    Demonstra a capacidade de ler e validar dados de negócio do ERP em tempo real.
+/*/
+User Function VldDescVrf()
+    Local nDescPed   := SC5->C5_DESCONTO // Campo padrão de percentual de desconto no cabeçalho
+    Local cNumPedido := SC5->C5_NUM      // Número do pedido posicionado no Browse
+    Local nLimite    := 15.00
+
+    // Verifica se o desconto aplicado no PDV/Retaguarda ultrapassa a política comercial
+    If nDescPed > nLimite
+        // Exibe uma mensagem de alerta em conformidade com as boas práticas de UI do Protheus
+        FWAlertWarning(;
+            "O Pedido de Venda " + cNumPedido + " possui " + AllTrim(Str(nDescPed)) + "% de desconto. " +;
+            "Excede o limite operacional de " + AllTrim(Str(nLimite)) + "%. Necessita liberação de Alçada N3.",;
+            "Auditoria Comercial de Varejo";
+        )
+    Else
+        FWAlertInfo(;
+            "Pedido de Venda " + cNumPedido + " validado com sucesso. Desconto dentro da margem permitida.",;
+            "Auditoria Comercial de Varejo";
+        )
+    EndIf
+
+    Return Nil
